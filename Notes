@@ -1,0 +1,164 @@
+Express - is a framework for building web applications on top of Node.js.
+
+Create (POST) - Make something
+    Browsers can only perform a CREATE operation if they send POST request to the server. This POST request can be triggered through JavaScript or through a <form> element in your HTML doc.
+
+    You need three things on this form element:
+        1. An action attribute 
+        2. A method attribute   
+        3. name attributes on each <input> elements within the form
+
+    We need to create a collection before we can store items into a database. (analogy: a database is a room and we need boxes (collections) in this room)
+
+    db.collection - specify the collection (const quotesCollection = db.collection('quotes'))
+
+    MongoClient.connect(/* ... */)
+     .then(client => {
+        // ...
+        const db = client.db('star-wars-quotes')
+        const quotesCollection = db.collection('quotes')
+        // ...
+    })
+
+    insertOne method - add items into a MongoDB collection (quotesCollection.insertOne(req.body))
+    app.post('/quotes', (req, res) => {
+        quotesCollection.insertOne(req.body)
+          .then(result => {
+            console.log(result)
+          })
+          .catch(error => console.error(error))
+    })
+
+
+ex. <form action="/quotes" method="POST">
+        <input type="text" placeholder="name" name="name">
+        <input type="text" placeholder="quote" name="quote">
+        <button type="submit">Submit</button>
+    </form>
+
+    The method tells browsers what kind of request to send.
+    The action attribute tells the browser where to send the POST request. 
+
+    We can handle this POST request with a post method in server.js.
+    app.post('/quotes', (req, res) => {
+        console.log('Hellooooooooooooooooo!')
+    })
+
+
+Read (GET)- Get something
+    Browsers perform the READ operation when you visit a website. They send a GET request to the server to perform this READ operation.
+
+    get method - app.get(endpoint, callback)
+        endpoint - anything that comes after domain (ex. /blog/crud-express-mongodb or / in localhost:3000/)
+
+    callback tells the server what to do when the requested endpoint matches the endpoint stated. It takes two arguments: A request object (req) and a response object (res). 
+        
+        app.get('/', function (req, res) {
+            // do something here
+        })
+
+    send method (comes with response object) - res.send('Hello World')
+
+    sendFile method (comes with the res object) - res.sendFile(__dirname + '/index.html')
+
+Update (PUT) - Change something
+
+Delete (DELETE)- Remove something
+
+You need to restart your server whenever you make a change to server.js, so let’s take a quick detour and streamline it by using a tool called nodemon
+
+Nodemon restarts the server automatically when you save a file that’s used by the server.js.
+1. $ npm install nodemon --save-dev 
+    note: Bc we won’t use Nodemon on an actual server (only when we are developing stuff). --save-dev here adds Nodeman as a devDependency in the package.json file
+2. {
+    // ...
+    "scripts": {
+      "dev": "nodemon server.js"
+    }
+    // ...
+    }
+
+    Adding  script key in the package.json file. This lets us run nodemon server.js without the ./node_modules... preamble.
+3. Now, you can run "npm run dev" to trigger nodemon server.js
+
+Turns out, Express doesn’t handle reading data from the <form> element on it’s own. We have to add another package called body-parser to gain this functionality.
+1. npm install body-parser --save 
+    note: Body-parser is a middleware. They help to tidy up the request object before we use them. Express lets us use middleware with the use method.
+
+2. 
+const bodyParser= require('body-parser')
+
+// Make sure you place body-parser before your CRUD handlers!
+app.use(bodyParser.urlencoded({ extended: true }))
+
+// All your handlers here...
+app.get('/', (req, res) => {/*...*/})
+app.post('/quotes', (req, res) => {/*...*/})
+
+note: The urlencoded method within body-parser tells body-parser to extract data from the <form> element and add them to the body property in the request object.
+
+You should be able to see values from the <form> element inside req.body now. (try: console.log(req.body))
+
+MongoDB - is a database (Mongoose is a framework for MongoDB)
+
+1. npm install mongodb --save
+2. we can connect to MongoDB through the MongoClient’s connect method
+
+const MongoClient = require('mongodb').MongoClient
+
+MongoClient.connect('mongodb-connection-string', (err, client) => {
+  // ... do something here
+})
+
+3. The next part is to get the correct link to our database. Most people store their databases on cloud services like MongoDB Atlas
+
+Starting with MangoDB Atlas
+1. create new project
+2. create cluster (takes 5 mins)
+3. click on the connect button
+4. a modal pops up
+use current ip address (whitelist your ip)
+create user and pw (this username and password is used ONLY for the database.)
+5. Next, click on choose your connection method. Select “Connect to your application” and copy the connection string. (You need to replace 2 things here:
+
+Replace <username> with your Database username
+Replace <password> with the Database user’s password)
+
+note: The test in the connection string points to a test database. You would need to replace test with the name of your database if you use Mongoose. You can leave it as test if you use MongoClient like what we’re doing in this tutorial.
+6. Put this connection string inside the MongoClient.connect
+
+MongoClient.connect(connectionString, (err, client) => {
+  // ... do something here
+  if (err) return console.error(err)
+  console.log('Connected to Database') note: helps us we’ve connected to the database when we restart the server.
+}))
+
+You can remove the deprecation warning by adding the option into MongoClient.connect
+
+MongoClient.connect(connectionString, {
+  useUnifiedTopology: true
+}, (err, client) => {
+  if (err) return console.error(err)
+  console.log('Connected to Database')
+})
+
+MongoDB supports promises. If you want to use promises instead of callbacks, you can write MongoClient.connect like this. It behaves exactly like the code above.
+
+MongoClient.connect(connectionString, { useUnifiedTopology: true })
+  .then(client => {
+    console.log('Connected to Database')
+  })
+  .catch(error => console.error(error))
+
+We need the db variable from the connection to to access MongoDB. This means we need to put our express request handlers into the MongoClient’s then call.
+
+MongoClient.connect(/* ... */)
+  .then(client => {
+    // ...
+    const db = client.db('star-wars-quotes')
+    app.use(/* ... */)
+    app.get(/* ... */)
+    app.post(/* ... */)
+    app.listen(/* ... */)
+  })
+  .catch(console.error)
