@@ -1,11 +1,6 @@
-![21 Savage](public/21savage.jpg)
+# Savage Demo
 
-## Installation
+A simple Node.js and Express demo by creating a fan posting page for 21 Savage
 
-1. Clone repo
-2. run `npm install`
+<img width="947" alt="Savage Demo" src="https://user-images.githubusercontent.com/88993361/141242073-3bf79905-f618-4660-81f5-ed464a276a62.png">
 
-## Usage
-
-1. run `npm run savage`
-2. Navigate to `localhost:3000`
