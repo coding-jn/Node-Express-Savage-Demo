@@ -1,4 +1,4 @@
-# Savage Demo
+# Node.js and Express Savage Demo
 
 A simple Node.js and Express demo by creating a fan posting page for 21 Savage.
 
